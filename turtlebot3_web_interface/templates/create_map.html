@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建立地圖</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #1d2671, #c33764);
+            color: white;
+        }
+
+        h1 {
+            margin-top: 30px;
+            font-size: 2.5rem;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            color: black;
+        }
+
+        .modal input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal button {
+            background: #1d2671;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background: #3b3f97;
+        }
+    </style>
+</head>
+<body>
+    <h1>建立地圖</h1>
+    <div class="button-container">
+        <button onclick="moveRobot('forward')">前進</button>
+        <button onclick="moveRobot('backward')">後退</button>
+        <button onclick="moveRobot('left')">向左</button>
+        <button onclick="moveRobot('right')">向右</button>
+        <button onclick="moveRobot('stop')">停止</button>
+    </div>
+    <div class="button-container">
+        <button onclick="window.location.href='/';">返回</button>
+        <button onclick="openSaveModal()">儲存地圖</button>
+    </div>
+
+    <!-- 儲存地圖模態框 -->
+    <div id="saveModal" class="modal">
+        <div class="modal-content">
+            <h2>輸入地圖名稱</h2>
+            <input type="text" id="mapName" placeholder="請輸入地圖名稱">
+            <br>
+            <button onclick="saveMap()">完成</button>
+            <button onclick="closeSaveModal()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function moveRobot(direction) {
+            socket.emit('move_robot', { direction: direction });
+        }
+
+        function openSaveModal() {
+            document.getElementById('saveModal').style.display = 'flex';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').style.display = 'none';
+        }
+
+        function saveMap() {
+            const mapName = document.getElementById('mapName').value;
+            if (!mapName) {
+                alert('請輸入地圖名稱！');
+                return;
+            }
+
+            $.ajax({
+                url: '/save_map',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ map_name: mapName }),
+                success: function(response) {
+                    alert(response.message);
+                    closeSaveModal();
+                    shutdownProcesses();
+                },
+                error: function(response) {
+                    alert(response.responseJSON.message);
+                    closeSaveModal();
+                }
+            });
+        }
+
+        function shutdownProcesses() {
+            $.ajax({
+                url: '/shutdown',
+                type: 'POST',
+                success: function(response) {
+                    alert(response.message);
+                    window.location.href = '/'; // 返回主頁
+                },
+                error: function(response) {
+                    alert('關閉過程失敗！');
+                    window.location.href = '/';
+                }
+            });
+        }
+    </script>
+    <footer>
+        &copy; 2025 智慧型機器人菁英人才訓練基地 By 李俊德
+    </footer>
+</body>
+</html>
+

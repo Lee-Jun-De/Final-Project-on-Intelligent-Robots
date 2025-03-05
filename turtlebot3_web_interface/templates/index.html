@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>113-1智慧型機器人 期末專題</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #1d2671, #c33764);
+            color: white;
+        }
+
+        h1 {
+            margin-top: 50px;
+            font-size: 2.5rem;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            color: black;
+        }
+
+        .modal button {
+            background: #1d2671;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>113-1智慧型機器人 期末專題</h1>
+    <div class="button-container">
+        <button onclick="openModal()">建立地圖</button>
+        <button onclick="openNavigationModal()">導航</button>
+    </div>
+
+    <!-- 建立地圖模態框 -->
+    <div id="mapModal" class="modal">
+        <div class="modal-content">
+            <h2>選擇地圖類型</h2>
+            <button onclick="selectMap('house')">House 地圖</button>
+            <button onclick="selectMap('world')">World 地圖</button>
+            <button onclick="completeSelection()">完成</button>
+            <button onclick="closeModal()">取消</button>
+        </div>
+    </div>
+
+    <!-- 導航模態框 -->
+    <div id="navigationModal" class="modal">
+        <div class="modal-content">
+            <h2>選擇導航地圖</h2>
+            <div id="mapList"></div>
+            <button onclick="startNavigation()">開始導航</button>
+            <button onclick="closeNavigationModal()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedMap = '';
+        let selectedNavMap = '';
+
+        // 建立地圖功能
+        function openModal() {
+            document.getElementById('mapModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('mapModal').style.display = 'none';
+        }
+
+        function selectMap(mapType) {
+            selectedMap = mapType;
+            alert(`${mapType} 地圖已選擇`);
+        }
+
+        function completeSelection() {
+            if (selectedMap) {
+                window.location.href = `/create_map?map_type=${selectedMap}`;
+            } else {
+                alert('請先選擇一張地圖');
+            }
+        }
+
+        // 導航功能
+        function openNavigationModal() {
+            document.getElementById('navigationModal').style.display = 'flex';
+            
+            // 獲取地圖列表
+            $.ajax({
+                url: '/get_maps',
+                type: 'GET',
+                success: function(response) {
+                    const mapList = document.getElementById('mapList');
+                    mapList.innerHTML = '';
+                    response.maps.forEach(map => {
+                        const mapItem = document.createElement('div');
+                        mapItem.innerHTML = `
+                            <input type="radio" name="map" value="${map}" onclick="selectNavMap('${map}')">
+                            <label>${map}</label>
+                        `;
+                        mapList.appendChild(mapItem);
+                    });
+                },
+                error: function() {
+                    alert('無法加載地圖列表！');
+                }
+            });
+        }
+
+        function closeNavigationModal() {
+            document.getElementById('navigationModal').style.display = 'none';
+        }
+
+        function selectNavMap(map) {
+            selectedNavMap = map;
+        }
+
+        function startNavigation() {
+            if (!selectedNavMap) {
+                alert('請先選擇一張地圖！');
+                return;
+            }
+
+            $.ajax({
+                url: '/start_navigation',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ map_name: selectedNavMap }),
+                success: function(response) {
+                    alert(response.message);
+                    window.location.href = '/navigate_to_point';
+                },
+                error: function(response) {
+                    alert(response.responseJSON.error);
+                }
+            });
+        }
+    </script>
+    <footer>
+        &copy; 2025 智慧型機器人菁英人才訓練基地 By 李俊德
+    </footer>
+</body>
+</html>
+
