@@ -1,0 +1,9 @@
+<launch>
+    <!-- 啟動走廊地圖 -->
+    <node name="hallway_map" pkg="map_server" type="map_server" args="$(find your_package)/map/hallway.yaml" output="screen" />
+
+    <!-- 啟動教室1地圖 -->
+    <node name="classroom1_map" pkg="map_server" type="map_server" args="$(find your_package)/map/classroom1.yaml" output="screen" />
+
+</launch>
+

@@ -1,0 +1,8 @@
+<launch>
+    <!-- 啟動導航 -->
+    <include file="$(find your_navigation_package)/launch/amcl_navigation.launch" />
+
+    <!-- 啟動巡邏與地圖切換節點 -->
+    <node name="patrol_and_switch" pkg="patrol_bot" type="patrol_and_switch.py" output="screen" />
+</launch>
+

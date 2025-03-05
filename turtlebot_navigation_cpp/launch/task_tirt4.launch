@@ -1,0 +1,4 @@
+<launch>
+<node name="move_to_goal" pkg="turtlebot_navigation_cpp" type="move_to_goal" output="screen" />
+    <rosparam file="$(find turtlebot_navigation_cpp)/param/goal.yaml"/>
+</launch>
